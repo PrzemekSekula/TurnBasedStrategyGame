@@ -10,7 +10,7 @@ public class LevelGrid : MonoBehaviour
     public event EventHandler OnAnyUnitMovedGridPosition;
 
     [SerializeField] private Transform gridDebugObjectPrefab;
-    private GridSystem gridSystem;
+    private GridSystem<GridObject> gridSystem;
 
     private void Awake() 
     {
@@ -22,21 +22,12 @@ public class LevelGrid : MonoBehaviour
         }
         Instance = this;
 
-        gridSystem = new GridSystem(10, 10, 2f);
+        gridSystem = new GridSystem<GridObject>(10, 10, 2f,
+            (GridSystem<GridObject> g, GridPosition gridPosition) => 
+                new GridObject(g, gridPosition));
         gridSystem.CreateDebugOjbects(gridDebugObjectPrefab);    
     }
     // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void AddUnitAtGridPosition(GridPosition gridPosition, Unit unit)
     {
         gridSystem.GetGridObject(gridPosition).AddUnit(unit);
