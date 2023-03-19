@@ -145,6 +145,7 @@ public class ShootAction : BaseAction
                     // Target Unit is on the same team
                     continue;
                 }
+                
                 Vector3 unitWorldPosition = LevelGrid.Instance.GetWorldPosition(unitGridPosition);
                 Vector3 shootDir = (targetUnit.GetWorldPosition() - unitWorldPosition).normalized;
                 float unitShoulderHeight = 1.7f;

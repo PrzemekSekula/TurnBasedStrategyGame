@@ -68,7 +68,6 @@ public class GrenadeAction : BaseAction
 
     public override void TakeAction(GridPosition gridPosition, Action onActionComplete)
     {
-        Debug.Log("Grenade action taken");
         Transform grenadeProjectileTransform = Instantiate(
             grenadeProjectilePrefab,
             unit.GetWorldPosition(),
