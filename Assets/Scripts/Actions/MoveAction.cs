@@ -108,7 +108,7 @@ public class MoveAction : BaseAction
                     continue;
                 }
 
-                if (!Pathfinding.Instance.isWalkableGridPosition(testGridPosition))
+                if (!Pathfinding.Instance.IsWalkableGridPosition(testGridPosition))
                 {
                     // Grid position is not walkable
                     continue;
