@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Door : MonoBehaviour
 {
-    [SerializeField] private bool isOpen;
+    [SerializeField] private bool isOpen = false;
     private GridPosition gridPosition;
     private Animator animator;
     private Action onInteractComplete;
