@@ -31,17 +31,48 @@ public class GridSystemHex<TGridObject>
     public Vector3 GetWorldPosition(GridPosition gridPosition)
     {
         return cellSize * new Vector3(
-            gridPosition.x + ((gridPosition.z % 2 == 1) ? 0.5f : 0f),
+            gridPosition.x + (((gridPosition.z % 2) == 1) ? 0.5f : 0f),
             0,
             gridPosition.z * HEX_VERTICAL_OFFSET_MULTIPLIER);
     }
 
     public GridPosition GetGridPosition(Vector3 worldPosition)
     {
-        return new GridPosition(
+        GridPosition roughXZ = new GridPosition(
             Mathf.RoundToInt(worldPosition.x / cellSize),
-            Mathf.RoundToInt(worldPosition.z / cellSize)
+            Mathf.RoundToInt(worldPosition.z / cellSize / HEX_VERTICAL_OFFSET_MULTIPLIER)
         );
+
+        bool oddRow = roughXZ.z % 2 == 1;
+
+        List<GridPosition> neighborGridPositionList = new List<GridPosition>
+        {
+            roughXZ + new GridPosition(-1, 0),
+            roughXZ + new GridPosition(+1, 0),
+
+            roughXZ + new GridPosition(0, +1),
+            roughXZ + new GridPosition(0, -1),
+
+            roughXZ + new GridPosition(oddRow ? +1 : -1, +1),
+            roughXZ + new GridPosition(oddRow ? +1 : -1, -1),
+
+        };
+
+        GridPosition closestGridPosition = roughXZ;
+
+        foreach (GridPosition neighborGridPosition in neighborGridPositionList)
+        {
+            if (IsValidGridPosition(neighborGridPosition))
+            {
+                if (Vector3.Distance(GetWorldPosition(neighborGridPosition), worldPosition) < 
+                    Vector3.Distance(GetWorldPosition(closestGridPosition), worldPosition))
+                {
+                    closestGridPosition = neighborGridPosition;
+                }
+            }
+        }
+
+        return closestGridPosition;
     }
 
     public void CreateDebugOjbects(Transform debugPrefab)
