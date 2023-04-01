@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class Pathfinding : MonoBehaviour
 {
-    private const int MOVE_STRAIGHT_COST = 10;
-    private const int MOVE_DIAGONAL_COST = 14;
 
     public static Pathfinding Instance { get; private set; }
 
@@ -88,7 +86,7 @@ public class Pathfinding : MonoBehaviour
         }
         
         startNode.setGCost(0);
-        startNode.setHCost(CalculateDistance(startGridPosition, endGridPosition));
+        startNode.setHCost(CalculateHeuristicDistance(startGridPosition, endGridPosition));
         startNode.CalculateFCost();
 
         while (openList.Count > 0)
@@ -117,12 +115,12 @@ public class Pathfinding : MonoBehaviour
                     continue;
                 }
 
-                int tentativeGCost = currentNode.getGCost() + CalculateDistance(currentNode.GetGridPosition(), neighbourNode.GetGridPosition());
+                int tentativeGCost = currentNode.getGCost() + 1; // Distance between current and neighbour is always 1
                 if (tentativeGCost < neighbourNode.getGCost())
                 {
                     neighbourNode.SetCameFromPathNode(currentNode);
                     neighbourNode.setGCost(tentativeGCost);
-                    neighbourNode.setHCost(CalculateDistance(neighbourNode.GetGridPosition(), endGridPosition));
+                    neighbourNode.setHCost(CalculateHeuristicDistance(neighbourNode.GetGridPosition(), endGridPosition));
                     neighbourNode.CalculateFCost();
 
                     if (!openList.Contains(neighbourNode))
@@ -139,13 +137,12 @@ public class Pathfinding : MonoBehaviour
         return null;
     }
 
-    public int CalculateDistance(GridPosition gridPositionA, GridPosition gridPositionB)
+    public int CalculateHeuristicDistance(GridPosition gridPositionA, GridPosition gridPositionB)
     {
-        GridPosition gridPositionDistance = gridPositionA - gridPositionB;
-        int xDistance = Mathf.Abs(gridPositionDistance.x); 
-        int zDistance = Mathf.Abs(gridPositionDistance.z);
-        return MOVE_DIAGONAL_COST * Mathf.Min(xDistance, zDistance) + 
-                MOVE_STRAIGHT_COST * Mathf.Abs(xDistance - zDistance); 
+        return Mathf.RoundToInt(
+            Vector3.Distance(gridSystem.GetWorldPosition(gridPositionA), 
+                             gridSystem.GetWorldPosition(gridPositionB))
+        );
     }
 
     private PathNode GetLowestFCostPathNode(List<PathNode> pathNodeList)
@@ -172,26 +169,37 @@ public class Pathfinding : MonoBehaviour
         List<PathNode> neighbourList = new List<PathNode>();
         GridPosition gridPosition = currentNode.GetGridPosition();
 
-        // Differs from the course code
-        for (int x = gridPosition.x - 1; x <=gridPosition.x + 1; x++)
+        bool oddRow = gridPosition.z % 2 == 1;
+
+        List<GridPosition> neighborGridPositionList = new List<GridPosition>
         {
+            gridPosition + new GridPosition(-1, 0),
+            gridPosition + new GridPosition(+1, 0),
+
+            gridPosition + new GridPosition(0, +1),
+            gridPosition + new GridPosition(0, -1),
+
+            gridPosition + new GridPosition(oddRow ? +1 : -1, +1),
+            gridPosition + new GridPosition(oddRow ? +1 : -1, -1),
+
+        };    
+
+
+        foreach (GridPosition neighborGridPosition in neighborGridPositionList)
+        {
+            int x = neighborGridPosition.x;
+            int z = neighborGridPosition.z;
             if ( (x < 0) || (x >= gridSystem.GetWidth()) )
             {
                 continue;
             }
 
-            for (int z = gridPosition.z - 1; z <= gridPosition.z + 1; z++)
+            if ( (z < 0) || (z >= gridSystem.GetHeight()) )
             {
-                if ( (z < 0) || (z >= gridSystem.GetHeight()) )
-                {
-                    continue;
-                }
-                if ( (x == gridPosition.x) && (z == gridPosition.z) )
-                {
-                    continue;
-                }
-                neighbourList.Add(GetNode(x, z));
+                continue;
             }
+            
+            neighbourList.Add(gridSystem.GetGridObject(neighborGridPosition));
         }
 
         return neighbourList;
