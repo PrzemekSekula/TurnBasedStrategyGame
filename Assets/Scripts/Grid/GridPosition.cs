@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 public struct GridPosition : IEquatable<GridPosition>
 {
@@ -52,5 +53,21 @@ public struct GridPosition : IEquatable<GridPosition>
     {
         return new GridPosition(a.x - b.x, a.z - b.z);
     }  
+
+    public List<GridPosition> FindNeighbors()
+    {
+        bool oddRow = this.z % 2 == 1;
+        return new List<GridPosition>
+        {
+            this + new GridPosition(-1, 0),
+            this + new GridPosition(+1, 0),
+
+            this + new GridPosition(0, +1),
+            this + new GridPosition(0, -1),
+
+            this + new GridPosition(oddRow ? +1 : -1, +1),
+            this + new GridPosition(oddRow ? +1 : -1, -1),
+        };
+    } 
 
 }

@@ -171,18 +171,7 @@ public class Pathfinding : MonoBehaviour
 
         bool oddRow = gridPosition.z % 2 == 1;
 
-        List<GridPosition> neighborGridPositionList = new List<GridPosition>
-        {
-            gridPosition + new GridPosition(-1, 0),
-            gridPosition + new GridPosition(+1, 0),
-
-            gridPosition + new GridPosition(0, +1),
-            gridPosition + new GridPosition(0, -1),
-
-            gridPosition + new GridPosition(oddRow ? +1 : -1, +1),
-            gridPosition + new GridPosition(oddRow ? +1 : -1, -1),
-
-        };    
+        List<GridPosition> neighborGridPositionList = gridPosition.FindNeighbors();
 
 
         foreach (GridPosition neighborGridPosition in neighborGridPositionList)
