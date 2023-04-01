@@ -6,6 +6,7 @@ using UnityEngine;
 public class GrenadeAction : BaseAction
 {
     [SerializeField] private Transform grenadeProjectilePrefab;
+    [SerializeField] private LayerMask obstaclesLayerMask;
 
     private int maxThrowDistance = 7;
 
@@ -37,31 +38,33 @@ public class GrenadeAction : BaseAction
 
         GridPosition unitGridPosition = unit.GetGridPosition();
 
-        for (int x = -maxThrowDistance; x <= maxThrowDistance; x++)
+        List<GridPosition> neighborGridPositionList = unitGridPosition.FindNeighbors(maxThrowDistance);
+
+        foreach (GridPosition testGridPosition in neighborGridPositionList)
         {
-            for (int z = -maxThrowDistance; z <= maxThrowDistance; z++)
+
+            if (!LevelGrid.Instance.IsValidGridPosition(testGridPosition))
             {
-                GridPosition offsetGridPosition = new GridPosition(x, z);    
-                GridPosition testGridPosition = unitGridPosition + offsetGridPosition;
-
-                if (!LevelGrid.Instance.IsValidGridPosition(testGridPosition))
-                {
-                    // Invalid grid position
-                    continue;
-                }
-
-                // Slightly different than the original code, they used Manhatan distance
-                float testDistance = Mathf.Sqrt(x * x + z * z);
-
-                if (testDistance > maxThrowDistance)
-                {
-                    // Out of range.
-                    continue;
-                }
-
-               validActionGridPositionList.Add(testGridPosition);
+                // Invalid grid position
+                continue;
             }
-        }
+
+            Vector3 unitWorldPosition = LevelGrid.Instance.GetWorldPosition(unitGridPosition);
+            Vector3 targetWorldPosition = LevelGrid.Instance.GetWorldPosition(testGridPosition);
+            Vector3 throwDir = (targetWorldPosition - unitWorldPosition).normalized;
+            float unitShoulderHeight = 1.7f;
+            if (Physics.Raycast(
+                unitWorldPosition + Vector3.up * unitShoulderHeight,
+                throwDir,
+                Vector3.Distance(unitWorldPosition, targetWorldPosition),
+                obstaclesLayerMask
+                ))
+            {
+                // Blocked by obstacle
+                continue;
+            }
+            validActionGridPositionList.Add(testGridPosition);
+        }        
 
         return validActionGridPositionList;
     }

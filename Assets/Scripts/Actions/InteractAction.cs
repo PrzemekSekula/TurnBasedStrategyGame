@@ -34,27 +34,23 @@ public class InteractAction : BaseAction
 
         GridPosition unitGridPosition = unit.GetGridPosition();
 
-        for (int x = -maxInteractDistance; x <= maxInteractDistance; x++)
+        List<GridPosition> neighborGridPositionList = unitGridPosition.FindNeighbors(maxInteractDistance);
+
+        foreach (GridPosition testGridPosition in neighborGridPositionList)
         {
-            for (int z = -maxInteractDistance; z <= maxInteractDistance; z++)
+            if (!LevelGrid.Instance.IsValidGridPosition(testGridPosition))
             {
-                GridPosition offsetGridPosition = new GridPosition(x, z);    
-                GridPosition testGridPosition = unitGridPosition + offsetGridPosition;
-
-                if (!LevelGrid.Instance.IsValidGridPosition(testGridPosition))
-                {
-                    // Invalid grid position
-                    continue;
-                }
-
-                IInteractable interactable = LevelGrid.Instance.GetInteractableAtGridPosition(testGridPosition);
-                if (interactable == null)
-                {
-                    continue;
-                }
-
-               validActionGridPositionList.Add(testGridPosition);
+                // Invalid grid position
+                continue;
             }
+
+            IInteractable interactable = LevelGrid.Instance.GetInteractableAtGridPosition(testGridPosition);
+            if (interactable == null)
+            {
+                continue;
+            }
+
+            validActionGridPositionList.Add(testGridPosition);
         }
 
         return validActionGridPositionList;

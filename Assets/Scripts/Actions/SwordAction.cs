@@ -86,36 +86,31 @@ public class SwordAction : BaseAction
 
         GridPosition unitGridPosition = unit.GetGridPosition();
 
-        for (int x = -maxSwordDistance; x <= maxSwordDistance; x++)
+        List<GridPosition> neighborGridPositionList = unitGridPosition.FindNeighbors(maxSwordDistance);
+        foreach (GridPosition testGridPosition in neighborGridPositionList)
         {
-            for (int z = -maxSwordDistance; z <= maxSwordDistance; z++)
+            if (!LevelGrid.Instance.IsValidGridPosition(testGridPosition))
             {
-                GridPosition offsetGridPosition = new GridPosition(x, z);    
-                GridPosition testGridPosition = unitGridPosition + offsetGridPosition;
-
-                if (!LevelGrid.Instance.IsValidGridPosition(testGridPosition))
-                {
-                    // Invalid grid position
-                    continue;
-                }
-
-                if (!LevelGrid.Instance.HasAnyUnitOnGridPosition(testGridPosition))
-                {
-                    // Grid Position is empty, no Unit
-                    continue;
-                }
-
-                Unit targetUnit = LevelGrid.Instance.GetUnitAtGridPosition(testGridPosition);
-
-                if (targetUnit.IsEnemy() == unit.IsEnemy())
-                {
-                    // Target Unit is on the same team
-                    continue;
-                }
-
-
-               validActionGridPositionList.Add(testGridPosition);
+                // Invalid grid position
+                continue;
             }
+
+            if (!LevelGrid.Instance.HasAnyUnitOnGridPosition(testGridPosition))
+            {
+                // Grid Position is empty, no Unit
+                continue;
+            }
+
+            Unit targetUnit = LevelGrid.Instance.GetUnitAtGridPosition(testGridPosition);
+
+            if (targetUnit.IsEnemy() == unit.IsEnemy())
+            {
+                // Target Unit is on the same team
+                continue;
+            }
+
+
+            validActionGridPositionList.Add(testGridPosition);
         }
 
         return validActionGridPositionList;
